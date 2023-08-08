@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const app = express();
 
 const db = require('./db');
+const {userRouter} = require('./routes');
 
 const port = process.env.PORT;
 
@@ -14,30 +15,20 @@ app.unsubscribe(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use('/users', userRouter);
+
 app.use((err, req, res, next) => {
     const status = err.status || 500;
     const message = err.message || "Something went wrong";
     res.status(status).json({message})
 })
 
-app.get("/", (req, res) => {
-    res.send("Hello World!");
-})
+db.on('connect', (client) =>
+    client.query('CREATE TABLE IF NOT EXISTS users (username VARCHAR(255), email VARCHAR(255) UNIQUE)'));
 
-db.on("connect", client => {
-    client.query("CREATE TABLE IF NOT EXISTS users (username VARCHAR(255), email VARCHAR(255))")
-        .catch(err => console.log(err));
+app.get('/', (req, res) => {
+    res.send('Hi there!');
 })
-
-app.get("/users", async (req, res) => {
-    const users = await db.query("SELECT * FROM users");
-    res.status(200).json({ users });
-})
-
-app.post("/users", async (req, res) => {
-  const user = await db.query("INSERT INTO users (username, email) VALUES ($1, $2)", [username, email]);
-  res.status(200).json({ user });
-});
 
 app.listen(port, () => {
     console.log(`Server is listening on port ${port}`)

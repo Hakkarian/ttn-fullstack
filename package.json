@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "g": "docker compose up --build",
+    "d": "docker compose down",
+    "rm": "docker rmi $(docker images -q)"
+  },
+  "dependencies": {
+    "sequelize": "^6.32.1"
+  }
+}
